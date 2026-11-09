@@ -1,6 +1,7 @@
 import express from 'express';
 import { readFile } from 'node:fs/promises';
 import { filtrarAnimales } from './filtrarAnimales.js';
+import { parsearFiltros, FiltroInvalidoError } from './parsearFiltros.js';
 
 const app = express();
 const PORT = 3000;
@@ -16,10 +17,16 @@ app.get('/api/animales', async (req, res) => {
     try {
         const contenidoArchivo = await readFile(archivoAnimales, 'utf-8');
         const animales = JSON.parse(contenidoArchivo);
-        const resultados = filtrarAnimales(animales, req.query);
+
+        const filtros = parsearFiltros(req.query);
+        const resultados = filtrarAnimales(animales, filtros);
         res.json(resultados);
     } catch (error) {
-        console.error('Error al leer los animales:', error);
+        if (error instanceof FiltroInvalidoError) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
