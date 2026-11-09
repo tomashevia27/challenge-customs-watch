@@ -7,17 +7,17 @@ const app = express();
 const PORT = 3000;
 const archivoAnimales = new URL('../database/animals.json', import.meta.url);
 
+const contenidoArchivo = await readFile(archivoAnimales, 'utf-8');
+const animales = JSON.parse(contenidoArchivo);
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-app.get('/api/animales', async (req, res) => {
+app.get('/api/animales', (req, res) => {
     try {
-        const contenidoArchivo = await readFile(archivoAnimales, 'utf-8');
-        const animales = JSON.parse(contenidoArchivo);
-
         const filtros = parsearFiltros(req.query);
         const resultados = filtrarAnimales(animales, filtros);
         res.json(resultados);
