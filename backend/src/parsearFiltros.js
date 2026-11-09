@@ -1,77 +1,91 @@
 export class FiltroInvalidoError extends Error {
-    constructor(mensaje) {
+    constructor(mensaje, filtro) {
         super(mensaje);
         this.name = 'FiltroInvalidoError';
+        this.filtro = filtro;
     }
 }
 
-function parsearTexto(valor, nombreFiltro) {
+const REGEX_DECIMAL_NO_NEGATIVO = /^\d+(?:\.\d+)?$/;
+
+function leerString(valor, nombreFiltro, esperado) {
     if (valor === undefined) {
         return undefined;
     }
+
+    if (Array.isArray(valor)) {
+        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" no puede repetirse.`, nombreFiltro);
+    }
+
     if (typeof valor !== 'string') {
-        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser una cadena de texto.`);
+        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser ${esperado}.`, nombreFiltro);
     }
 
     const valorLimpio = valor.trim();
     return valorLimpio === '' ? undefined : valorLimpio;
 }
 
-function parsearPeso(valor, nombreFiltro) {
-    if (valor === undefined) {
-        return undefined;
-    }
-    if (typeof valor !== 'string') {
-        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser un número no negativo.`);
-    }
+function parsearTexto(valor, nombreFiltro) {
+    return leerString(valor, nombreFiltro, 'una cadena de texto');
+}
 
-    const valorLimpio = valor.trim();
-    if (valorLimpio === '') {
+function parsearPeso(valor, nombreFiltro) {
+    const esperado = 'un número decimal no negativo';
+    const valorLimpio = leerString(valor, nombreFiltro, esperado);
+    if (valorLimpio === undefined) {
         return undefined;
     }
 
     const peso = Number(valorLimpio);
-    if (!Number.isFinite(peso) || peso < 0) {
-        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser un número no negativo.`);
+    if (!REGEX_DECIMAL_NO_NEGATIVO.test(valorLimpio) || !Number.isFinite(peso)) {
+        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser ${esperado}.`, nombreFiltro);
     }
+
     return peso;
 }
 
+function parsearBooleano(valor, nombreFiltro) {
+    const esperado = 'un valor booleano ("true" o "false")';
+    const valorLimpio = leerString(valor, nombreFiltro, esperado)?.toLowerCase();
+    if (valorLimpio === undefined) {
+        return undefined;
+    }
+
+    if (valorLimpio !== 'true' && valorLimpio !== 'false') {
+        throw new FiltroInvalidoError(`El filtro "${nombreFiltro}" debe ser ${esperado}.`, nombreFiltro);
+    }
+
+    return valorLimpio === 'true';
+}
+
+const PARSERS = {
+    nombre: parsearTexto,
+    clase: parsearTexto,
+    dieta: parsearTexto,
+    continente: parsearTexto,
+    pesoMin: parsearPeso,
+    pesoMax: parsearPeso,
+    enPeligro: parsearBooleano
+};
+
 export function parsearFiltros(query) {
+    const desconocidos = Object.keys(query).filter((filtro) => !Object.hasOwn(PARSERS, filtro));
+    if (desconocidos.length > 0) {
+        throw new FiltroInvalidoError(
+            `Filtros no soportados: ${desconocidos.join(', ')}. Permitidos: ${Object.keys(PARSERS).join(', ')}.`
+        );
+    }
+
     const filtros = {};
-    const { pesoMin, pesoMax, enPeligro } = query;
-
-    for (const nombreFiltro of ['nombre', 'clase', 'dieta', 'continente']) {
-        const valor = parsearTexto(query[nombreFiltro], nombreFiltro);
+    for (const [filtro, parsear] of Object.entries(PARSERS)) {
+        const valor = parsear(query[filtro], filtro);
         if (valor !== undefined) {
-            filtros[nombreFiltro] = valor;
+            filtros[filtro] = valor;
         }
     }
 
-    const pesoMinimo = parsearPeso(pesoMin, 'pesoMin');
-    const pesoMaximo = parsearPeso(pesoMax, 'pesoMax');
-    if (pesoMinimo !== undefined) {
-        filtros.pesoMin = pesoMinimo;
+    if (filtros.pesoMin !== undefined && filtros.pesoMax !== undefined && filtros.pesoMin > filtros.pesoMax) {
+        throw new FiltroInvalidoError('El filtro "pesoMin" no puede ser mayor que "pesoMax".', 'pesoMin');
     }
-    if (pesoMaximo !== undefined) {
-        filtros.pesoMax = pesoMaximo;
-    }
-    if (pesoMinimo !== undefined && pesoMaximo !== undefined && pesoMinimo > pesoMaximo) {
-        throw new FiltroInvalidoError('El filtro "pesoMin" no puede ser mayor que "pesoMax".');
-    }
-
-    if (enPeligro !== undefined) {
-        if (typeof enPeligro !== 'string') {
-            throw new FiltroInvalidoError('El filtro "enPeligro" debe ser "true" o "false".');
-        }
-        const peligroLimpio = enPeligro.trim().toLowerCase();
-        if (peligroLimpio !== '') {
-            if (peligroLimpio !== 'true' && peligroLimpio !== 'false') {
-                throw new FiltroInvalidoError('El filtro "enPeligro" debe ser "true" o "false".');
-            }
-            filtros.enPeligro = peligroLimpio === 'true';
-        }
-    }
-
     return filtros;
 }

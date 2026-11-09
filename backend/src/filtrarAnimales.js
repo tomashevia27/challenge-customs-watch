@@ -1,49 +1,24 @@
-// se asume que los filtros llegan parseados y validados
-export function filtrarAnimales(animales, { nombre, clase, dieta, continente, pesoMin, pesoMax, enPeligro }) {
-    let resultados = animales;
+const predicados = {
+    nombre: (animal, valorFiltro) => animal.nombreComun.toLowerCase().includes(valorFiltro),
+    clase: (animal, valorFiltro) => animal.clase.toLowerCase() === valorFiltro,
+    dieta: (animal, valorFiltro) => animal.dieta.toLowerCase() === valorFiltro,
+    continente: (animal, valorFiltro) => animal.continente.toLowerCase() === valorFiltro,
+    enPeligro: (animal, valorFiltro) => animal.enPeligroExtincion === valorFiltro,
+    pesoMin: (animal, valorFiltro) => animal.pesoPromedioKg >= valorFiltro,
+    pesoMax: (animal, valorFiltro) => animal.pesoPromedioKg <= valorFiltro,
+};
 
-    if (nombre !== undefined) {
-        const busqueda = nombre.toLowerCase();
-        resultados = resultados.filter((animal) =>
-            animal.nombreComun.toLowerCase().includes(busqueda)
-        );
-    }
+export function filtrarAnimales(animales, filtros = {}) {
+    const activos = Object.entries(filtros)
+        .filter(([, valor]) => valor !== undefined)
+        .map(([clave, valor]) => [
+            predicados[clave],
+            typeof valor === 'string' ? valor.toString().toLowerCase() : valor
+        ]);
 
-    if (clase !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.clase.toLowerCase() === clase.toLowerCase()
-        );
-    }
+    if (activos.length === 0) return animales;
 
-    if (dieta !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.dieta.toLowerCase() === dieta.toLowerCase()
-        );
-    }
-
-    if (continente !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.continente.toLowerCase() === continente.toLowerCase()
-        );
-    }
-
-    if (pesoMin !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.pesoPromedioKg >= pesoMin
-        );
-    }
-
-    if (pesoMax !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.pesoPromedioKg <= pesoMax
-        );
-    }
-
-    if (enPeligro !== undefined) {
-        resultados = resultados.filter((animal) =>
-            animal.enPeligroExtincion === enPeligro
-        );
-    }
-
-    return resultados;
+    return animales.filter((animal) =>
+        activos.every(([predicado, valor]) => predicado(animal, valor))
+    );
 }
