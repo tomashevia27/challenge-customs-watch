@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { obtenerUsuarios, guardarUsuarios } from './usuarios.js';
 
 const authRouter = Router();
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@.]+(?:\.[^\s@.]+)*@[^\s@.]+(?:\.[^\s@.]+)+$/;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
