@@ -2,6 +2,7 @@ import express from 'express';
 import { readFile } from 'node:fs/promises';
 import { filtrarAnimales } from './filtrarAnimales.js';
 import { parsearFiltros, FiltroInvalidoError } from './parsearFiltros.js';
+import authRouter from './authRoutes.js';
 
 const app = express();
 const archivoAnimales = new URL('../database/animals.json', import.meta.url);
@@ -9,6 +10,7 @@ const contenidoArchivo = await readFile(archivoAnimales, 'utf-8');
 const animales = JSON.parse(contenidoArchivo);
 
 app.use(express.json());
+app.use('/api/auth', authRouter);
 
 app.get('/', (req, res) => {
     res.send('Ruta raíz de la aplicacion. Para obtener la lista de animales, utiliza la ruta /api/animales con los filtros deseados.');
