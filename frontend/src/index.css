@@ -57,6 +57,7 @@ select:focus-visible {
 
 .site-nav {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 1.5rem;
 }
@@ -70,6 +71,22 @@ select:focus-visible {
 .site-nav a.active {
   color: #1f654e;
   font-weight: 700;
+}
+
+.session-email {
+  color: #657068;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.nav-button {
+  padding: 0;
+  color: #1f654e;
+  background: none;
+  border: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
 }
 
 .main-content {
@@ -194,6 +211,23 @@ h2 {
   font-weight: 650;
 }
 
+.form-message {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.error-message {
+  color: #823521;
+  background: #fff0e9;
+}
+
+.success-message {
+  color: #1f654e;
+  background: #e9f4ec;
+}
+
 .page-heading {
   margin-bottom: 2rem;
 }
@@ -214,16 +248,34 @@ h2 {
   width: 100%;
 }
 
+.filter-error {
+  grid-column: 1 / -1;
+}
+
 .results {
   margin-top: 2.5rem;
 }
 
 .results-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
 .results-heading h2 {
   margin-bottom: 0;
+}
+
+.result-count,
+.result-status {
+  color: #657068;
+  font-size: 0.9rem;
+}
+
+.result-status {
+  padding: 1.5rem 0;
 }
 
 .table-wrap {
@@ -255,12 +307,6 @@ th {
 
 tbody tr:last-child td {
   border-bottom: 0;
-}
-
-.empty-results {
-  padding: 3rem 1rem;
-  color: #657068;
-  text-align: center;
 }
 
 @media (max-width: 800px) {
