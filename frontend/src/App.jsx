@@ -29,7 +29,7 @@ function App() {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link className="brand" to={sesion ? '/animales' : '/login'}>Buscador de animales</Link>
+        <Link className="brand" to={sesion ? '/animales' : '/login'} aria-label="Faunario, inicio"><span className="brand-icon" aria-hidden="true">f</span><span>faunario<span className="brand-dot">.</span></span></Link>
         <nav className="site-nav" aria-label="Navegación principal">
           {sesion ? (
             <>
@@ -62,6 +62,11 @@ function App() {
           <Route path="*" element={<Navigate to={sesion ? '/animales' : '/login'} replace />} />
         </Routes>
       </main>
+
+      <footer className="site-footer">
+        <Link className="footer-brand" to={sesion ? '/animales' : '/login'}>faunario<span>.</span></Link>
+        <span className="footer-note">FAUNA · NATURALEZA · VIDA</span>
+      </footer>
     </div>
   )
 }
