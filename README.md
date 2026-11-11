@@ -60,13 +60,3 @@ npm run dev
 Abrí la dirección que muestra Vite, normalmente `http://localhost:5173`. En desarrollo, Vite envía las solicitudes `/api` al backend. Creá una cuenta en `/registro`, ingresá en `/login`, buscá animales en `/animales` y usá **Salir** para cerrar la sesión.
 
 El token se guarda solo en el estado de React. Al recargar la página se cierra la sesión y hay que ingresar otra vez. El cierre de sesión elimina el token del navegador, pero no revoca un JWT ya emitido; el backend lo acepta hasta su vencimiento.
-
-## Comprobaciones
-
-```bash
-cd frontend
-npm run lint
-npm run build
-```
-
-La compilación genera `frontend/dist/`. Para comprobar las dependencias desde una instalación limpia, ejecutá `npm ci` tanto en `backend/` como en `frontend/`.
